@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test de Inteligencias Múltiples - Explorador Espacial</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      color: #ffffff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    #space-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+      to { text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 40px rgba(0, 255, 255, 0.8); }
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .name-input {
+      width: 100%;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .name-input:focus {
+      outline: none;
+      border-color: #00ffff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+
+    .name-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .question {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .question:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 255, 255, 0.2);
+    }
+
+    .question strong {
+      color: #00ffff;
+      font-size: 18px;
+    }
+
+    .question label {
+      margin-left: 15px;
+      margin-right: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .question label:hover {
+      color: #00ffff;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    }
+
+    .question input[type="radio"] {
+      transform: scale(1.5);
+      margin-right: 8px;
+      accent-color: #00ffff;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(45deg, #00ffff, #ff00ff);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      margin-top: 30px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 255, 255, 0.5);
+      background: linear-gradient(45deg, #ff00ff, #00ffff);
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 25px;
+      background: rgba(76, 175, 80, 0.2);
+      border: 2px solid rgba(76, 175, 80, 0.5);
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      display: none;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result h3 {
+      color: #00ff88;
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+    }
+
+    .result p {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    .result strong {
+      color: #ffff00;
+    }
+
+    .result em {
+      color: #ff69b4;
+      font-style: italic;
+    }
+
+    .result ul {
+      margin-left: 20px;
+      margin-top: 15px;
+    }
+
+    .result li {
+      margin: 8px 0;
+      color: #00ffff;
+      font-weight: bold;
+    }
+
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      font-size: 24px;
+      color: #00ffff;
+      text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    }
+
+    .space-info {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      z-index: 100;
+      font-size: 14px;
+      color: #00ffff;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      .form-container {
+        padding: 20px;
+      }
+      
+      .space-info {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="space-canvas"></div>
+  
+  <div class="loading" id="loading">🚀 Cargando universo espacial...</div>
+  
+  <div class="space-info">
+    <h4>🌌 Explorador Espacial</h4>
+    <p>Descubre tu inteligencia entre las estrellas</p>
+  </div>
+
+  <div class="container">
+    <h1>🌟 TEST DE INTELIGENCIAS MÚLTIPLES 🌟</h1>
+    
+    <div class="form-container">
+      <form id="testForm">
+        <label for="nombre" style="font-size: 18px; color: #00ffff; font-weight: bold;">🚀 Nombres y apellidos:</label>
+        <input type="text" id="nombre" name="nombre" class="name-input" placeholder="Ingresa tu nombre completo..." required />
+
+        <div id="questions"></div>
+
+        <button type="submit" class="submit-btn">🔍 Descubrir mis Inteligencias</button>
+      </form>
+
+      <div class="result" id="result"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Variables para Three.js
+    let scene, camera, renderer, stars = [], planets = [], shootingStars = [];
+    let nebulae = [];
+    
+    // Configuración del test
+    const mapping = {
+      A: [9, 10, 17, 22, 30],
+      B: [5, 7, 15, 20, 25],
+      C: [1, 11, 14, 23, 27],
+      D: [8, 16, 19, 21, 29],
+      E: [3, 4, 13, 24, 28],
+      F: [2, 6, 26, 31, 33],
+      G: [12, 18, 32, 34, 35],
+    };
+
+    const tiposInteligencia = {
+      A: "Inteligencia Verbal",
+      B: "Inteligencia Lógico-matemática",
+      C: "Inteligencia Visual espacial",
+      D: "Inteligencia Kinestésica-corporal",
+      E: "Inteligencia Musical-rítmica",
+      F: "Inteligencia Intrapersonal",
+      G: "Inteligencia Interpersonal"
+    };
+
+    const questionsText = [
+      "Prefiero hacer un mapa que explicarle a alguien como tiene que llegar.",
+      "Si estoy enojado(a) o contento(a) generalmente sé exactamente por qué.",
+      "Sé tocar (o antes sabía tocar) un instrumento musical.",
+      "Asocio la música con mis estados de ánimo.",
+      "Puedo sumar o multiplicar mentalmente con mucha rapidez.",
+      "Puedo ayudar a un amigo a manejar sus sentimientos porque yo lo pude hacer antes en relación a sentimientos parecidos.",
+      "Me gusta trabajar con calculadoras y computadores.",
+      "Aprendo rápido a bailar un ritmo nuevo.",
+      "No me es difícil decir lo que pienso en el curso de una discusión o debate.",
+      "Disfruto de una buena charla, discurso o sermón.",
+      "Siempre distingo el norte del sur, esté donde esté.",
+      "Me gusta reunir grupos de personas en una fiesta o en un evento especial.",
+      "La vida me parece vacía sin música.",
+      "Siempre entiendo los gráficos que vienen en las instrucciones de equipos o instrumentos.",
+      "Me gusta hacer rompecabezas y entretenerme con juegos electrónicos.",
+      "Me fue fácil aprender a andar en bicicleta. (o patines)",
+      "Me enojo cuando oigo una discusión o una afirmación que parece ilógica.",
+      "Soy capaz de convencer a otros que sigan mis planes.",
+      "Tengo buen sentido de equilibrio y coordinación.",
+      "Con frecuencia veo configuraciones y relaciones entre números con más rapidez y facilidad que otros.",
+      "Me gusta construir modelos (o hacer esculturas)",
+      "Tengo agudeza para encontrar el significado de las palabras.",
+      "Puedo mirar un objeto de una manera y con la misma facilidad verlo de otra.",
+      "Con frecuencia hago la conexión entre una pieza de música y algún evento de mi vida.",
+      "Me gusta trabajar con números y figuras.",
+      "Me gusta sentarme silenciosamente y reflexionar sobre mis sentimientos íntimos.",
+      "Con sólo mirar la forma de construcciones y estructuras me siento a gusto.",
+      "Me gusta tararear, silbar y cantar en la ducha o cuando estoy sola.",
+      "Soy bueno(a) para el atletismo.",
+      "Me gusta escribir cartas detalladas a mis amigos.",
+      "Generalmente me doy cuenta de la expresión que tengo en la cara.",
+      "Me doy cuenta de las expresiones en la cara de otras personas.",
+      "Me mantengo \"en contacto\" con mis estados de ánimo. No me cuesta identificarlos.",
+      "Me doy cuenta de los estados de ánimo de otros.",
+      "Me doy cuenta bastante bien de lo que otros piensan de mí."
+    ];
+
+    // Inicializar escena 3D
+    function initSpace() {
+      scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x000022, 50, 300);
+      
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 50);
+      
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000011, 1);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      
+      document.getElementById('space-canvas').appendChild(renderer.domElement);
+      
+      createStarField();
+      createPlanets();
+      createNebulae();
+      createAmbientLights();
+      
+      // Evento de redimensionamiento
+      window.addEventListener('resize', onWindowResize);
+      
+      // Ocultar loading
+      document.getElementById('loading').style.display = 'none';
+      
+      // Iniciar animación
+      animate();
+    }
+
+    function createStarField() {
+      // Crear campo de estrellas
+      const starGeometry = new THREE.BufferGeometry();
+      const starMaterial = new THREE.PointsMaterial({
+        color: 0xFFFFFF,
+        size: 1,
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      const starVertices = [];
+      for (let i = 0; i < 2000; i++) {
+        const x = (Math.random() - 0.5) * 400;
+        const y = (Math.random() - 0.5) * 400;
+        const z = (Math.random() - 0.5) * 400;
+        starVertices.push(x, y, z);
+      }
+      
+      starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+      const starField = new THREE.Points(starGeometry, starMaterial);
+      scene.add(starField);
+      
+      // Crear estrellas brillantes individuales
+      for (let i = 0; i < 50; i++) {
+        const starGeom = new THREE.SphereGeometry(0.5, 8, 8);
+        const starMat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setHSL(Math.random(), 0.8, 0.8),
+          transparent: true,
+          opacity: 0.7
+        });
+        
+        const star = new THREE.Mesh(starGeom, starMat);
+        star.position.set(
+          (Math.random() - 0.5) * 200,
+          (Math.random() - 0.5) * 200,
+          (Math.random() - 0.5) * 200
+        );
+        
+        scene.add(star);
+        stars.push({
+          mesh: star,
+          speed: Math.random() * 0.02 + 0.005,
+          originalOpacity: 0.7
+        });
+      }
+    }
+
+    function createPlanets() {
+      const planetData = [
+        { size: 3, color: 0xFF6B35, distance: 30, speed: 0.01 },
+        { size: 2.5, color: 0x00FFFF, distance: 50, speed: 0.007 },
+        { size: 4, color: 0xFF00FF, distance: 70, speed: 0.005 },
+        { size: 2, color: 0x00FF88, distance: 90, speed: 0.003 },
+        { size: 3.5, color: 0xFFFF00, distance: 110, speed: 0.002 }
+      ];
+      
+      planetData.forEach((data, index) => {
+        const planetGeometry = new THREE.SphereGeometry(data.size, 32, 32);
+        const planetMaterial = new THREE.MeshPhongMaterial({
+          color: data.color,
+          shininess: 100,
+          transparent: true,
+          opacity: 0.8
+        });
+        
+        const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+        
+        // Posición inicial
+        planet.position.x = Math.cos(index * Math.PI / 3) * data.distance;
+        planet.position.z = Math.sin(index * Math.PI / 3) * data.distance;
+        planet.position.y = (Math.random() - 0.5) * 20;
+        
+        // Luz del planeta
+        const planetLight = new THREE.PointLight(data.color, 1, 20);
+        planetLight.position.copy(planet.position);
+        
+        scene.add(planet);
+        scene.add(planetLight);
+        
+        planets.push({
+          mesh: planet,
+          light: planetLight,
+          distance: data.distance,
+          speed: data.speed,
+          angle: index * Math.PI / 3
+        });
+      });
+    }
+
+    function createNebulae() {
+      for (let i = 0; i < 3; i++) {
+        const nebulaGeometry = new THREE.SphereGeometry(20, 32, 32);
+        const nebulaMaterial = new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setHSL(Math.random(), 0.6, 0.3),
+          transparent: true,
+          opacity: 0.1,
+          side: THREE.BackSide
+        });
+        
+        const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+        nebula.position.set(
+          (Math.random() - 0.5) * 150,
+          (Math.random() - 0.5) * 150,
+          (Math.random() - 0.5) * 150
+        );
+        
+        scene.add(nebula);
+        nebulae.push({
+          mesh: nebula,
+          rotationSpeed: Math.random() * 0.005 + 0.001
+        });
+      }
+    }
+
+    function createAmbientLights() {
+      const ambientLight = new THREE.AmbientLight(0x404040, 0.2);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(50, 50, 50);
+      scene.add(directionalLight);
+    }
+
+    function createShootingStar() {
+      const shootingStarGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+      const shootingStarMaterial = new THREE.MeshBasicMaterial({
+        color: 0xFFFFFF,
+        transparent: true,
+        opacity: 1
+      });
+      
+      const shootingStar = new THREE.Mesh(shootingStarGeometry, shootingStarMaterial);
+      
+      // Posición inicial aleatoria
+      shootingStar.position.set(
+        (Math.random() - 0.5) * 200,
+        (Math.random() - 0.5) * 200,
+        (Math.random() - 0.5) * 200
+      );
+      
+      // Velocidad aleatoria
+      const velocity = new THREE.Vector3(
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4
+      );
+      
+      scene.add(shootingStar);
+      
+      shootingStars.push({
+        mesh: shootingStar,
+        velocity: velocity,
+        life: 1.0
+      });
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      const time = Date.now() * 0.001;
+      
+      // Animar estrellas
+      stars.forEach(star => {
+        star.mesh.rotation.x += star.speed;
+        star.mesh.rotation.y += star.speed;
+        star.mesh.material.opacity = star.originalOpacity + 0.3 * Math.sin(time * 3);
+      });
+      
+      // Animar planetas
+      planets.forEach(planet => {
+        planet.angle += planet.speed;
+        planet.mesh.position.x = Math.cos(planet.angle) * planet.distance;
+        planet.mesh.position.z = Math.sin(planet.angle) * planet.distance;
+        planet.mesh.rotation.y += 0.01;
+        
+        planet.light.position.copy(planet.mesh.position);
+        planet.light.intensity = 1 + 0.5 * Math.sin(time * 2);
+      });
+      
+      // Animar nebulosas
+      nebulae.forEach(nebula => {
+        nebula.mesh.rotation.x += nebula.rotationSpeed;
+        nebula.mesh.rotation.y += nebula.rotationSpeed;
+        nebula.mesh.material.opacity = 0.1 + 0.05 * Math.sin(time);
+      });
+      
+      // Animar estrellas fugaces
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const shootingStar = shootingStars[i];
+        shootingStar.mesh.position.add(shootingStar.velocity);
+        shootingStar.life -= 0.02;
+        shootingStar.mesh.material.opacity = shootingStar.life;
+        
+        if (shootingStar.life <= 0) {
+          scene.remove(shootingStar.mesh);
+          shootingStars.splice(i, 1);
+        }
+      }
+      
+      // Crear nuevas estrellas fugaces ocasionalmente
+      if (Math.random() < 0.005) {
+        createShootingStar();
+      }
+      
+      // Rotación suave de la cámara
+      camera.position.x = Math.cos(time * 0.1) * 3;
+      camera.position.y = Math.sin(time * 0.05) * 2;
+      camera.lookAt(0, 0, 0);
+      
+      renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Generar preguntas del test
+    function generateQuestions() {
+      const questionsContainer = document.getElementById("questions");
+      
+      questionsText.forEach((text, i) => {
+        const num = i + 1;
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `
+          <strong>${num}.</strong> ${text}<br><br>
+          <label><input type="radio" name="q${num}" value="V" required /> ✅ Verdadero</label>
+          <label><input type="radio" name="q${num}" value="F" /> ❌ Falso</label>
+        `;
+        questionsContainer.appendChild(div);
+      });
+    }
+
+    // Manejar envío del formulario
+    document.getElementById("testForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const form = new FormData(this);
+      const result = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0 };
+
+      for (const [key, numbers] of Object.entries(mapping)) {
+        numbers.forEach(num => {
+          if (form.get("q" + num) === "V") result[key]++;
+        });
+      }
+
+      let output = `<h3>🚀 Resultados para: ${form.get("nombre")}</h3>`;
+      let tiposConseguidos = [];
+
+      for (const [key, score] of Object.entries(result)) {
+        let nivel = score === 5 ? "🌟 Sobresaliente" : score >= 4 ? "⭐ Habilidad marcada" : "";
+        if (nivel) tiposConseguidos.push(tiposInteligencia[key]);
+        output += `<p><strong>${key} (${tiposInteligencia[key]}):</strong> ${score} puntos ${nivel ? `- <em>${nivel}</em>` : ""}</p>`;
+      }
+
+      if (tiposConseguidos.length > 0) {
+        output += `<h4>🎯 Tipos de inteligencia detectados:</h4><ul>`;
+        tiposConseguidos.forEach(tipo => {
+          output += `<li>🧠 ${tipo}</li>`;
+        });
+        output += `</ul>`;
+      } else {
+        output += `<p><em>🔍 No se ha detectado ninguna inteligencia destacada. ¡Sigue explorando tus habilidades!</em></p>`;
+      }
+
+      document.getElementById("result").innerHTML = output;
+      document.getElementById("result").style.display = "block";
+      
+      // Scroll suave al resultado
+      document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Inicializar todo cuando la página carga
+    window.addEventListener('load', function() {
+      initSpace();
+      generateQuestions();
+    });
+  </script>
+</body>
+</html>
